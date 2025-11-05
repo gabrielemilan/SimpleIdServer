@@ -52,9 +52,11 @@ namespace SimpleIdServer.Scim.Persistence.MongoDB
             }
             else
             {
-                total = await _scimDbContext.SCIMRepresentationLst.AsQueryable()
-                    .Where(s => s.ResourceType == parameter.ResourceType)
-                    .CountAsync(cancellationToken);
+                var countQuery = _scimDbContext.SCIMRepresentationLst.AsQueryable()
+                    .Where(s => s.ResourceType == parameter.ResourceType);
+                if (!string.IsNullOrWhiteSpace(parameter.Realm))
+                    countQuery = countQuery.Where(r => r.RealmName == parameter.Realm);
+                total = await countQuery.CountAsync(cancellationToken);
             }
 
             if (parameter.Count == 0)
